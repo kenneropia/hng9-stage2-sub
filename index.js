@@ -1,15 +1,49 @@
+//import required lilbraries
 const fs = require("fs");
 const crypto = require("crypto");
 const { parse } = require("csv-parse");
+const converter = require("json-2-csv");
 const readline = require("readline");
-const fileDir = "./input_folder/all-team/NFT Naming csv - Pry bar.csv";
+const path = require("path");
+const { writeFile } = require("fs/promises");
+const defaultFileDir =
+  "./input_folder/all-team/NFT Naming csv - Team Bevel.csv";
 
-const run = async () => {
+//main function to acommodate async operations
+const run = async (cliFilePath = null) => {
+  //get filepath from stdin or use default value
+  const fileDir = cliFilePath || defaultFileDir;
   const firstRow = (await getFirstLine(fileDir)).split(",");
 
+  //converting to json from csv using a function
   const teamJson = await convertCsvToJson(fileDir, firstRow);
-  console.log(teamJson);
+
+  //converting to csv from json using a function
+  const teamCsv = await convertJsonToCsv(teamJson);
+
+  //getting filename from path provided
+  const fileName = path.parse(fileDir);
+
+  //writing result to a file
+  await writeFile(`${fileName.name}.output.csv`, teamCsv);
+
+  // console.log(JSON.stringify(teamJson, null, 2));
+  process.stdout.write(teamCsv);
+
+  process.exit();
 };
+async function convertJsonToCsv(csvData) {
+  return await new Promise((resolve) => {
+    converter.json2csv(csvData, (err, csv) => {
+      if (err) {
+        throw err;
+      }
+
+      // print CSV string
+      resolve(csv);
+    });
+  });
+}
 
 async function convertCsvToJson(pathToFile, attr) {
   const body = [];
@@ -18,7 +52,6 @@ async function convertCsvToJson(pathToFile, attr) {
     parse({
       delimiter: ",",
       from_line: 2,
-      to_line: 20,
 
       columns: attr,
     })
@@ -26,12 +59,38 @@ async function convertCsvToJson(pathToFile, attr) {
   return await new Promise((resolve) => {
     teamCsvFile
       .on("data", function (row) {
+        const newData = {
+          format: "CHIP-0007",
+          name: row.Filename,
+          description: row.Description,
+          minting_tool: "",
+          sensitive_content: "false",
+          series_number: row["Series Number"],
+          series_total: 380,
+          attributes: [
+            {
+              trait_type: "Gender",
+              value: row?.Gender,
+            },
+          ],
+          collection: {
+            name: "Zuri NFT Tickets for Free lunch",
+            id: row?.UUID,
+            attributes: [
+              {
+                type: "description",
+                value: "Rewards for accomplishments during HNGi9",
+              },
+            ],
+          },
+        };
+
         const hash = crypto
           .createHash("sha256")
-          .update(JSON.stringify(row))
+          .update(JSON.stringify(newData))
           .digest("hex");
 
-        body.push({ ...row, hash });
+        body.push({ ...newData, Hash: hash });
 
         return row;
       })
@@ -57,4 +116,20 @@ async function getFirstLine(pathToFile) {
   return line;
 }
 
-run();
+console.log(
+  "Input the team csv file path you want to use or leave blank to use the team bevel version"
+);
+
+process.stdin.on("data", (data) => {
+  let fileDir = data.toString().trim();
+
+  fileDir.length && path.resolve(fileDir);
+
+  console.log(
+    `${
+      data.toString().trim().length ? `You type  ${fileDir}` : "you typed none"
+    }`
+  );
+
+  run(fileDir);
+});

@@ -33,13 +33,13 @@ const run = async (cliFilePath = null) => {
   process.exit();
 };
 async function convertJsonToCsv(csvData) {
+  //created a promise to prevent callback hall
   return await new Promise((resolve) => {
     converter.json2csv(csvData, (err, csv) => {
       if (err) {
         throw err;
       }
 
-      // print CSV string
       resolve(csv);
     });
   });
@@ -56,9 +56,13 @@ async function convertCsvToJson(pathToFile, attr) {
       columns: attr,
     })
   );
+
+  //created a promise to prevent callback hall
+
   return await new Promise((resolve) => {
     teamCsvFile
       .on("data", function (row) {
+        // Structing the result to the format provided
         const newData = {
           format: "CHIP-0007",
           name: row.Filename,
@@ -84,7 +88,7 @@ async function convertCsvToJson(pathToFile, attr) {
             ],
           },
         };
-
+        //creating an hash with thw node crypto modules
         const hash = crypto
           .createHash("sha256")
           .update(JSON.stringify(newData))
@@ -123,6 +127,7 @@ console.log(
 process.stdin.on("data", (data) => {
   let fileDir = data.toString().trim();
 
+  //check if user entered a path
   fileDir.length && path.resolve(fileDir);
 
   console.log(

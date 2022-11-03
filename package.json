@@ -1,0 +1,23 @@
+{
+  "name": "hng9-stage2-sub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kenneropia/hng9-stage2-sub.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kenneropia/hng9-stage2-sub/issues"
+  },
+  "homepage": "https://github.com/kenneropia/hng9-stage2-sub#readme",
+  "dependencies": {
+    "csv": "^6.2.1",
+    "fs-extra": "^10.1.0"
+  }
+}

@@ -15,4 +15,4 @@ then run:
 
 Input the full path you copied into the stdin or let the script use the default(team bevel) by pressing enter
 
-tada🎉, your work is done. Look for a file called *.output.csv
+tada🎉, your work is done. Look for a file ending with *.output.csv
